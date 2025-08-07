@@ -166,7 +166,10 @@ background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-ind
   <button onclick="addDoll()" id="addBtn">إضافة</button>
 
 </div>
-<input type="text" id="searchBar" placeholder="🔍 ابحث عن دمية..." 
+<input type="text" id="searchBar" 
+  placeholder="🔍" 
+  oninput="searchDolls()" 
+  style="width: 90%; padding: 10px; margin: 20px auto; display: block; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;" />
   oninput="searchDolls()" 
   style="width: 90%; padding: 10px; margin: 20px auto; display: block; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;" />
 
@@ -273,7 +276,13 @@ importError: {
   ar: "❌ حدث خطأ أثناء قراءة الملف.",
   en: "❌ An error occurred while reading the file.",
   es: "❌ Ocurrió un error al leer el archivo."
-}
+},
+searchPlaceholder: {
+  ar: "🔍 ابحث عن دمية...",
+  en: "🔍 Search for a doll...",
+  es: "🔍 Buscar una muñeca..."
+},
+
 
 
 
@@ -300,6 +309,7 @@ function updateUI() {
 document.getElementById('importBtn').innerHTML = `📥 ${translationsUI.importBtn[language]}`;
 document.getElementById('advancedOptionsBtn').textContent = `⚙️ ${translationsUI.advancedOptionsBtn[language]}`;
 document.getElementById('advancedTitle').textContent = translationsUI.advancedCurtainTitle[language];
+document.getElementById('searchBar').placeholder = translationsUI.searchPlaceholder[language];
 
 }
 
