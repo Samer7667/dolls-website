@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>معرض دمى الفرو</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; direction: rtl; }
+    .header { text-align: center; padding: 20px; }
+    .form-container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+    .form-container input, .form-container textarea { width: 100%; margin: 5px 0; padding: 8px; }
+    .doll-list { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+    .doll-card { background: #fff; margin: 10px; padding: 10px; border-radius: 8px; width: 200px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .doll-card img { max-width: 100%; border-radius: 4px; }
+    .language-select { margin-top: 10px; }
+    .image-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.logo-img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 3px solid #fff;
+}
+
+.square-img {
+  max-width: 300px;
+  height: 140px;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 3px solid #fff;
+}
+
+
+  </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="image-row">
+    <img src="logo.png" alt="Logo" class="logo-img">
+    <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" alt="Happy Birthday" class="square-img">
+  </div>
+  <h1 id="title">معرض دمى الفرو</h1>
+  <select id="language" class="language-select">
+    <option value="ar">العربية</option>
+    <option value="en">English</option>
+    <option value="es">Español</option>
+  </select>
+</div>
+
+<div class="form-container">
+  <h2 id="formTitle">أضف دمية جديدة</h2>
+  <input type="text" id="name" placeholder="اسم الدمية" />
+  <input type="date" id="birthday" placeholder="تاريخ الميلاد" />
+  <input type="number" id="year" placeholder="سنة الإصدار" />
+  <textarea id="poem" placeholder="القصيدة"></textarea>
+  <input type="file" id="image" accept="image/*" />
+  <button onclick="addDoll()" id="addBtn">إضافة</button>
+</div>
+
+<div class="doll-list" id="dollList"></div>
+
+<script>
+    const translationsUI = {
+  title: {
+    ar: "معرض دمى الفرو",
+    en: "Plush Doll Gallery",
+    es: "Galería de muñecos de felpa"
+  },
+  formTitle: {
+    ar: "أضف دمية جديدة",
+    en: "Add New Doll",
+    es: "Agregar nueva muñeca"
+  },
+  name: {
+    ar: "اسم الدمية",
+    en: "Doll Name",
+    es: "Nombre de la muñeca"
+  },
+  birthday: {
+    ar: "تاريخ الميلاد",
+    en: "Birthday",
+    es: "Cumpleaños"
+  },
+  year: {
+    ar: "سنة الإصدار",
+    en: "Release Year",
+    es: "Año de lanzamiento"
+  },
+  poem: {
+    ar: "القصيدة",
+    en: "Poem",
+    es: "Poema"
+  },
+  addBtn: {
+    ar: "إضافة",
+    en: "Add",
+    es: "Agregar"
+  },
+  deleteBtn: {
+    ar: "حذف",
+    en: "Delete",
+    es: "Eliminar"
+  },
+  editBtn: {
+    ar: "تعديل",
+    en: "Edit",
+    es: "Editar"
+  },
+  alertFillFields: {
+    ar: "يرجى تعبئة جميع الحقول وإضافة صورة.",
+    en: "Please fill in all fields and add an image.",
+    es: "Por favor, complete todos los campos y agregue una imagen."
+  },
+  alertEditInfo: {
+    ar: "يمكنك الآن تعديل الحقول ثم الضغط على إضافة لحفظ التعديل.",
+    en: "You can now edit the fields and click Add to save changes.",
+    es: "Ahora puedes editar los campos y hacer clic en Agregar para guardar los cambios."
+  },
+  confirmDelete: {
+    ar: "هل أنت متأكد من الحذف؟",
+    en: "Are you sure you want to delete?",
+    es: "¿Estás seguro de que quieres eliminarlo?"
+  }
+};
+
+function updateUI() {
+  document.getElementById('title').textContent = translationsUI.title[language];
+  document.getElementById('formTitle').textContent = translationsUI.formTitle[language];
+  document.getElementById('name').placeholder = translationsUI.name[language];
+  document.getElementById('birthday').placeholder = translationsUI.birthday[language];
+  document.getElementById('year').placeholder = translationsUI.year[language];
+  document.getElementById('poem').placeholder = translationsUI.poem[language];
+  document.getElementById('addBtn').textContent = translationsUI.addBtn[language];
+
+  // تغيير اتجاه الصفحة إذا كانت اللغة العربية
+  document.body.dir = (language === 'ar') ? 'rtl' : 'ltr';
+}
+
+  let language = 'ar';
+
+  document.getElementById('language').addEventListener('change', function() {
+    language = this.value;
+    updateUI();
+    displayDolls();
+  });
+
+  function addDoll() {
+    const name = document.getElementById('name').value;
+    const birthday = document.getElementById('birthday').value;
+    const year = document.getElementById('year').value;
+    const poem = document.getElementById('poem').value;
+    const imageInput = document.getElementById('image');
+
+    if (!name || !birthday || !year || !poem || !imageInput.files[0]) {
+      alert(translationsUI.alertFillFields[language]);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const image = e.target.result;
+      const doll = { name, birthday, year, poem, image };
+      const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+      dolls.push(doll);
+      localStorage.setItem('dolls', JSON.stringify(dolls));
+      displayDolls();
+    };
+    reader.readAsDataURL(imageInput.files[0]);
+  }
+
+  function displayDolls() {
+    const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+    const list = document.getElementById('dollList');
+    list.innerHTML = '';
+
+    dolls.forEach(doll => {
+      const card = document.createElement('div');
+      card.className = 'doll-card';
+      card.innerHTML = `
+  <img src="${doll.image}">
+  <h3>${doll.name}</h3>
+  <p><strong>${translate('Birthday')}:</strong> ${doll.birthday}</p>
+  <p><strong>${translate('Year')}:</strong> ${doll.year}</p>
+  <p>${doll.poem}</p>
+  <button onclick="deleteDoll(${dolls.indexOf(doll)})">🗑️ ${translationsUI.deleteBtn[language]}</button>
+<button onclick="editDoll(${dolls.indexOf(doll)})">✏️ ${translationsUI.editBtn[language]}</button>
+`;
+      list.appendChild(card);
+    });
+  }
+
+  function translate(word) {
+    const translations = {
+      'Birthday': { ar: 'تاريخ الميلاد', en: 'Birthday', es: 'Cumpleaños' },
+      'Year': { ar: 'سنة الإصدار', en: 'Release Year', es: 'Año de lanzamiento' }
+    };
+    return translations[word][language];
+  }
+
+  displayDolls();
+  function deleteDoll(index) {
+  if (confirm(translationsUI.confirmDelete[language])) {
+    const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+    dolls.splice(index, 1);
+    localStorage.setItem('dolls', JSON.stringify(dolls));
+    displayDolls();
+  }
+}
+function editDoll(index) {
+  const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+  const doll = dolls[index];
+
+  // تعبئة الحقول في الفورم
+  document.getElementById('name').value = doll.name;
+  document.getElementById('birthday').value = doll.birthday;
+  document.getElementById('year').value = doll.year;
+  document.getElementById('poem').value = doll.poem;
+
+  // حذف القديمة
+  dolls.splice(index, 1);
+  localStorage.setItem('dolls', JSON.stringify(dolls));
+  displayDolls();
+
+  alert(translationsUI.alertEditInfo[language]);
+}
+
+</script>
+
+</body>
+</html>
