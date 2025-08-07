@@ -98,6 +98,7 @@
 
   </div>
   <h1 id="title">معرض دمى الفرو</h1>
+  <input type="text" id="searchBox" placeholder="🔍" oninput="searchDolls()" style="padding:8px; margin-top:10px; width:80%; max-width:300px; border-radius:6px; border:1px solid #ccc;">
   <select id="language" class="language-select">
     <option value="ar">العربية</option>
     <option value="en">English</option>
@@ -452,6 +453,29 @@ if (savedExampleImage) {
   document.getElementById('exampleImage').src = savedExampleImage;
 }
 
+function searchDolls() {
+  const query = document.getElementById('searchBox').value.toLowerCase();
+  const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+  const list = document.getElementById('dollList');
+  list.innerHTML = '';
+
+  dolls
+    .filter(doll => doll.name.toLowerCase().includes(query))
+    .forEach((doll, index) => {
+      const card = document.createElement('div');
+      card.className = 'doll-card';
+      card.innerHTML = `
+        <img src="${doll.image}">
+        <h3>${doll.name}</h3>
+        <p><strong>${translate('Birthday')}:</strong> ${doll.birthday}</p>
+        <p><strong>${translate('Year')}:</strong> ${doll.year}</p>
+        <p>${doll.poem}</p>
+        <button onclick="deleteDoll(${index})">🗑️ ${translationsUI.deleteBtn[language]}</button>
+        <button onclick="editDoll(${index})">✏️ ${translationsUI.editBtn[language]}</button>
+      `;
+      list.appendChild(card);
+    });
+}
 
 
 </script>
