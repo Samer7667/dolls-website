@@ -79,6 +79,9 @@
 <body>
 
 <div class="header">
+  <h1 id="title">
+  معرض دمى الفرو <span id="dollCounter" style="font-size:16px; color:gray;">(عدد الدمى: 0)</span>
+</h1>
   <div class="image-row">
     <img src="logo.png" alt="Logo" class="logo-img">
     <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" 
@@ -231,6 +234,11 @@ importError: {
   ar: "❌ حدث خطأ أثناء قراءة الملف.",
   en: "❌ An error occurred while reading the file.",
   es: "❌ Ocurrió un error al leer el archivo."
+},
+dollCounterLabel: {
+  ar: "عدد الدمى",
+  en: "Total Dolls",
+  es: "Total de muñecos"
 }
 
 
@@ -248,6 +256,7 @@ let editIndex = null;
 // تحديث الواجهة أول ما تفتح الصفحة
 updateUI();
 displayDolls();
+updateCounter();
 
 function updateUI() {
   document.getElementById('title').textContent = translationsUI.title[language];
@@ -341,7 +350,14 @@ function displayDolls() {
     `;
     list.appendChild(card);
   });
+  updateCounter(); // تحديث العداد بعد عرض الدمى
 }
+
+function updateCounter() {
+  const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+  document.getElementById('dollCounter').textContent = `${translationsUI.dollCounterLabel[language]}: ${dolls.length}`;
+}
+
 
 function translate(word) {
   const translations = {
@@ -419,6 +435,7 @@ function importDolls(event) {
 
 updateUI();
 displayDolls();
+updateCounter();
 function toggleCurtain() {
   const curtain = document.getElementById("curtain");
   curtain.style.display = (curtain.style.display === "none") ? "flex" : "none";
