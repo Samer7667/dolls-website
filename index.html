@@ -4,48 +4,69 @@
   <meta charset="UTF-8" />
   <title>معرض دمى الفرو</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; direction: rtl; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; }
     .header { text-align: center; padding: 20px; }
     .form-container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
     .form-container input, .form-container textarea { width: 100%; margin: 5px 0; padding: 8px; }
     .doll-list { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
     .doll-card { background: #fff; margin: 10px; padding: 10px; border-radius: 8px; width: 200px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    .doll-card img { max-width: 100%; border-radius: 4px; }
+    .doll-card img {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+}
     .language-select { margin-top: 10px; }
     .image-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .logo-img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 3px solid #fff;
+    }
+    .square-img {
+      max-width: 300px;
+      height: 140px;
+      object-fit: contain;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 3px solid #fff;
+    }
+    body[dir="ltr"] .form-container,
+    body[dir="ltr"] .doll-list { text-align: left; }
+    body[dir="rtl"] .form-container,
+    body[dir="rtl"] .doll-list { text-align: right; }
+    @media (max-width: 600px) {
+  .image-row {
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.logo-img {
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: 3px solid #fff;
-}
+  .form-container {
+    width: 90%;
+  }
 
-.square-img {
-  max-width: 300px;
-  height: 140px;
-  object-fit: contain;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: 3px solid #fff;
+  .doll-card {
+    width: 90%;
+  }
 }
-
 
   </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="image-row">
+  <div class="image-row">
     <img src="logo.png" alt="Logo" class="logo-img">
-    <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" alt="Happy Birthday" class="square-img">
+    <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" alt="Example" class="square-img" id="exampleImage" onclick="triggerExampleUpload()" style="cursor: pointer;">
+<input type="file" id="exampleImageInput" accept="image/*" style="display: none;" onchange="changeExampleImage(event)">
   </div>
   <h1 id="title">معرض دمى الفرو</h1>
   <select id="language" class="language-select">
@@ -56,6 +77,18 @@
 </div>
 
 <div class="form-container">
+    <div id="curtain" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999;">
+  <div style="background: white; padding: 30px; border-radius: 12px; min-width: 300px; text-align: center; position: relative;">
+    <button onclick="toggleCurtain()" style="position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; font-size: 16px; border-radius: 50%;">❌</button>
+    <h3 id="advancedTitle">⚙️ أدوات متقدمة</h3>
+    <button onclick="clearAll()" id="clearAllBtn">🗑️</button>
+    <button onclick="exportDolls()" id="exportBtn">💾</button>
+    <input type="file" id="importFile" accept="application/json" style="display: none;" onchange="importDolls(event)" />
+    <button onclick="document.getElementById('importFile').click()" id="importBtn">📥</button>
+  </div>
+</div>
+    <button id="advancedOptionsBtn" onclick="toggleCurtain()">⚙️ خيارات متقدمة</button>
   <h2 id="formTitle">أضف دمية جديدة</h2>
   <input type="text" id="name" placeholder="اسم الدمية" />
   <input type="date" id="birthday" placeholder="تاريخ الميلاد" />
@@ -68,7 +101,7 @@
 <div class="doll-list" id="dollList"></div>
 
 <script>
-    const translationsUI = {
+const translationsUI = {
   title: {
     ar: "معرض دمى الفرو",
     en: "Plush Doll Gallery",
@@ -128,8 +161,56 @@
     ar: "هل أنت متأكد من الحذف؟",
     en: "Are you sure you want to delete?",
     es: "¿Estás seguro de que quieres eliminarlo?"
-  }
+  },
+  clearAllBtn: {
+  ar: "مسح الكل",
+  en: "Clear All",
+  es: "Borrar todo"
+},
+importBtn: {
+  ar: "استيراد نسخة احتياطية",
+  en: "Import Backup",
+  es: "Importar Respaldo"
+},
+exportBtn: {
+  ar: "حفظ نسخة احتياطية",
+  en: "Export Backup",
+  es: "Guardar Respaldo"
+},
+advancedOptionsBtn: {
+  ar: "خيارات متقدمة",
+  en: "Advanced Options",
+  es: "Opciones Avanzadas"
+},
+advancedCurtainTitle: {
+  ar: "⚙️ أدوات متقدمة",
+  en: "⚙️ Advanced Tools",
+  es: "⚙️ Herramientas Avanzadas"
+},
+importSuccess: {
+  ar: "✅ تم الاستيراد بنجاح!",
+  en: "✅ Import successful!",
+  es: "✅ ¡Importación exitosa!"
+},
+invalidFile: {
+  ar: "❌ الملف غير صالح.",
+  en: "❌ Invalid file.",
+  es: "❌ Archivo no válido."
+},
+importError: {
+  ar: "❌ حدث خطأ أثناء قراءة الملف.",
+  en: "❌ An error occurred while reading the file.",
+  es: "❌ Ocurrió un error al leer el archivo."
+}
+
+
+
+
 };
+
+let language = document.getElementById('language').value;
+let editMode = false;
+let editIndex = null;
 
 function updateUI() {
   document.getElementById('title').textContent = translationsUI.title[language];
@@ -139,74 +220,100 @@ function updateUI() {
   document.getElementById('year').placeholder = translationsUI.year[language];
   document.getElementById('poem').placeholder = translationsUI.poem[language];
   document.getElementById('addBtn').textContent = translationsUI.addBtn[language];
-
-  // تغيير اتجاه الصفحة إذا كانت اللغة العربية
+  
   document.body.dir = (language === 'ar') ? 'rtl' : 'ltr';
+  document.documentElement.lang = language;
+  document.getElementById('clearAllBtn').innerHTML = `🗑️ ${translationsUI.clearAllBtn[language]}`;
+  document.getElementById('exportBtn').innerHTML = `💾 ${translationsUI.exportBtn[language]}`;
+document.getElementById('importBtn').innerHTML = `📥 ${translationsUI.importBtn[language]}`;
+document.getElementById('advancedOptionsBtn').textContent = `⚙️ ${translationsUI.advancedOptionsBtn[language]}`;
+document.getElementById('advancedTitle').textContent = translationsUI.advancedCurtainTitle[language];
+
 }
 
-  let language = 'ar';
+document.getElementById('language').addEventListener('change', function () {
+  language = this.value;
+  updateUI();
+  displayDolls();
+});
 
-  document.getElementById('language').addEventListener('change', function() {
-    language = this.value;
-    updateUI();
-    displayDolls();
-  });
+function addDoll() {
+  const name = document.getElementById('name').value;
+  const birthday = document.getElementById('birthday').value;
+  const year = document.getElementById('year').value;
+  const poem = document.getElementById('poem').value;
+  const imageInput = document.getElementById('image');
 
-  function addDoll() {
-    const name = document.getElementById('name').value;
-    const birthday = document.getElementById('birthday').value;
-    const year = document.getElementById('year').value;
-    const poem = document.getElementById('poem').value;
-    const imageInput = document.getElementById('image');
+  if (!name || !birthday || !year || !poem || (!editMode && !imageInput.files[0])) {
+    alert(translationsUI.alertFillFields[language]);
+    return;
+  }
 
-    if (!name || !birthday || !year || !poem || !imageInput.files[0]) {
-      alert(translationsUI.alertFillFields[language]);
-      return;
+  const saveDoll = (image) => {
+    const doll = { name, birthday, year, poem, image };
+    const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+
+    if (editMode) {
+      dolls[editIndex] = doll;
+      editMode = false;
+      editIndex = null;
+    } else {
+      dolls.push(doll);
     }
 
+    localStorage.setItem('dolls', JSON.stringify(dolls));
+    displayDolls();
+    document.getElementById('name').value = '';
+    document.getElementById('birthday').value = '';
+    document.getElementById('year').value = '';
+    document.getElementById('poem').value = '';
+    document.getElementById('image').value = '';
+    document.getElementById('addBtn').textContent = translationsUI.addBtn[language];
+  };
+
+  if (imageInput.files[0]) {
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const image = e.target.result;
-      const doll = { name, birthday, year, poem, image };
-      const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
-      dolls.push(doll);
-      localStorage.setItem('dolls', JSON.stringify(dolls));
-      displayDolls();
+    reader.onload = function (e) {
+      saveDoll(e.target.result);
     };
     reader.readAsDataURL(imageInput.files[0]);
-  }
-
-  function displayDolls() {
+  } else {
     const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
-    const list = document.getElementById('dollList');
-    list.innerHTML = '';
-
-    dolls.forEach(doll => {
-      const card = document.createElement('div');
-      card.className = 'doll-card';
-      card.innerHTML = `
-  <img src="${doll.image}">
-  <h3>${doll.name}</h3>
-  <p><strong>${translate('Birthday')}:</strong> ${doll.birthday}</p>
-  <p><strong>${translate('Year')}:</strong> ${doll.year}</p>
-  <p>${doll.poem}</p>
-  <button onclick="deleteDoll(${dolls.indexOf(doll)})">🗑️ ${translationsUI.deleteBtn[language]}</button>
-<button onclick="editDoll(${dolls.indexOf(doll)})">✏️ ${translationsUI.editBtn[language]}</button>
-`;
-      list.appendChild(card);
-    });
+    const oldImage = dolls[editIndex].image;
+    saveDoll(oldImage);
   }
+}
 
-  function translate(word) {
-    const translations = {
-      'Birthday': { ar: 'تاريخ الميلاد', en: 'Birthday', es: 'Cumpleaños' },
-      'Year': { ar: 'سنة الإصدار', en: 'Release Year', es: 'Año de lanzamiento' }
-    };
-    return translations[word][language];
-  }
+function displayDolls() {
+  const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+  const list = document.getElementById('dollList');
+  list.innerHTML = '';
 
-  displayDolls();
-  function deleteDoll(index) {
+  dolls.forEach((doll, index) => {
+    const card = document.createElement('div');
+    card.className = 'doll-card';
+    card.innerHTML = `
+      <img src="${doll.image}">
+      <h3>${doll.name}</h3>
+      <p><strong>${translate('Birthday')}:</strong> ${doll.birthday}</p>
+      <p><strong>${translate('Year')}:</strong> ${doll.year}</p>
+      <p>${doll.poem}</p>
+      <button onclick="deleteDoll(${index})">🗑️ ${translationsUI.deleteBtn[language]}</button>
+      <button onclick="editDoll(${index})">✏️ ${translationsUI.editBtn[language]}</button>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function translate(word) {
+  const translations = {
+    'Birthday': { ar: 'تاريخ الميلاد', en: 'Birthday', es: 'Cumpleaños' },
+    'Year': { ar: 'سنة الإصدار', en: 'Release Year', es: 'Año de lanzamiento' }
+  };
+  return translations[word][language];
+}
+
+function deleteDoll(index) {
   if (confirm(translationsUI.confirmDelete[language])) {
     const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
     dolls.splice(index, 1);
@@ -214,23 +321,85 @@ function updateUI() {
     displayDolls();
   }
 }
+
 function editDoll(index) {
   const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
   const doll = dolls[index];
 
-  // تعبئة الحقول في الفورم
+
   document.getElementById('name').value = doll.name;
   document.getElementById('birthday').value = doll.birthday;
   document.getElementById('year').value = doll.year;
   document.getElementById('poem').value = doll.poem;
+  document.getElementById('image').value = '';
 
-  // حذف القديمة
-  dolls.splice(index, 1);
-  localStorage.setItem('dolls', JSON.stringify(dolls));
-  displayDolls();
-
+  editMode = true;
+  editIndex = index;
+  document.getElementById('addBtn').textContent = translationsUI.editBtn[language];
   alert(translationsUI.alertEditInfo[language]);
 }
+
+function clearAll() {
+  if (confirm(translationsUI.confirmDelete[language])) {
+    localStorage.removeItem('dolls');
+    displayDolls();
+  }
+}
+function exportDolls() {
+  const dolls = localStorage.getItem('dolls') || '[]';
+  const blob = new Blob([dolls], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "dolls-backup.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+function importDolls(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const dolls = JSON.parse(e.target.result);
+      if (Array.isArray(dolls)) {
+        localStorage.setItem('dolls', JSON.stringify(dolls));
+        displayDolls();
+        alert(translationsUI.importSuccess[language]);
+      } else {
+        alert(translationsUI.invalidFile[language]);
+      }
+    } catch (err) {
+      alert(translationsUI.importError[language]);
+    }
+  };
+  reader.readAsText(file);
+}
+
+updateUI();
+displayDolls();
+function toggleCurtain() {
+  const curtain = document.getElementById("curtain");
+  curtain.style.display = (curtain.style.display === "none") ? "flex" : "none";
+}
+function triggerExampleUpload() {
+  document.getElementById('exampleImageInput').click();
+}
+
+function changeExampleImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('exampleImage').src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 
 </script>
 
