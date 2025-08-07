@@ -79,9 +79,8 @@
 <body>
 
 <div class="header">
-  <h1 id="title">
-  معرض دمى الفرو <span id="dollCounter" style="font-size:16px; color:gray;">(عدد الدمى: 0)</span>
-</h1>
+  <h1 id="pageTitle">...........</h1>
+<span id="dollCounter" style="font-size:16px; color:gray;">عدد الدمى: 0</span>
   <div class="image-row">
     <img src="logo.png" alt="Logo" class="logo-img">
     <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" 
@@ -353,10 +352,17 @@ function displayDolls() {
   updateCounter(); // تحديث العداد بعد عرض الدمى
 }
 
+function updateTitle() {
+  document.getElementById('pageTitle').textContent = translationsUI.pageTitle[language];
+}
+
 function updateCounter() {
   const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
-  document.getElementById('dollCounter').textContent = `${translationsUI.dollCounterLabel[language]}: ${dolls.length}`;
+  document.getElementById('dollCounter').textContent =
+    `${translationsUI.dollCounterLabel[language]}: ${dolls.length}`;
 }
+
+
 
 
 function translate(word) {
