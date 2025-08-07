@@ -3,7 +3,8 @@
 <head>
 
   <meta charset="UTF-8" />
-  <title>معرض دمى الفرو | Plush Toy Gallery | Galería de Peluches</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plush Toy Gallery</title>
   <!-- أيقونة الموقع -->
 <link rel="icon" href="favicon.png" type="image/png" />
 
@@ -75,6 +76,15 @@
     width: 90%;
   }
 }
+#curtain {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#curtain.active {
+  display: flex;
+}
 
   </style>
 </head>
@@ -113,7 +123,9 @@ background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-ind
   <input type="number" id="year" placeholder="سنة الإصدار" />
   <textarea id="poem" placeholder="القصيدة"></textarea>
   <input type="file" id="image" accept="image/*" />
+  <img id="previewImage" style="max-height: 100px; display: none; margin-top: 10px;" />
   <button onclick="addDoll()" id="addBtn">إضافة</button>
+  <button onclick="shareDolls()">🔗 مشاركة مجموعتي</button>
 </div>
 
 <div class="doll-list" id="dollList"></div>
@@ -252,7 +264,19 @@ document.getElementById('advancedTitle').textContent = translationsUI.advancedCu
 document.getElementById('language').addEventListener('change', function () {
   language = this.value;
   updateUI();
+const urlParams = new URLSearchParams(window.location.search);
+const sharedData = urlParams.get('view');
+if (sharedData) {
+  try {
+    const decoded = atob(decodeURIComponent(sharedData));
+    const dolls = JSON.parse(decoded);
+    displaySharedDolls(dolls);
+  } catch (e) {
+    alert("❌ الرابط غير صالح أو البيانات تالفة.");
+  }
+} else {
   displayDolls();
+}
 });
 
 function addDoll() {
@@ -300,6 +324,29 @@ function addDoll() {
     const oldImage = dolls[editIndex].image;
     saveDoll(oldImage);
   }
+}
+function displaySharedDolls(dollsArray) {
+  const list = document.getElementById("doll-list");
+  list.innerHTML = "";
+
+  dollsArray.forEach(doll => {
+    const card = document.createElement("div");
+    card.className = "doll-card";
+    card.innerHTML = `
+      <img src="${doll.image}" class="doll-img" />
+      <h3>${doll.name}</h3>
+      <p>${doll.description}</p>
+      <p>${doll.birthday}</p>
+    `;
+    list.appendChild(card);
+  });
+
+  // إخفاء أدوات التعديل
+  const form = document.getElementById("form");
+  if (form) form.style.display = "none";
+
+  const controls = document.getElementById("controls");
+  if (controls) controls.style.display = "none";
 }
 
 function displayDolls() {
@@ -401,7 +448,9 @@ updateUI();
 displayDolls();
 function toggleCurtain() {
   const curtain = document.getElementById("curtain");
-  curtain.style.display = (curtain.style.display === "none") ? "flex" : "none";
+  document.getElementById("previewImage").src = doll.image;
+document.getElementById("previewImage").style.display = "block";
+curtain.classList.toggle('active');
 }
 function triggerExampleUpload() {
   document.getElementById('exampleImageInput').click();
@@ -416,6 +465,20 @@ function changeExampleImage(event) {
     document.getElementById('exampleImage').src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+function shareDolls() {
+  const dolls = localStorage.getItem('dolls');
+  if (!dolls) {
+    alert("لا توجد دمى لمشاركتها.");
+    return;
+  }
+
+  const encoded = encodeURIComponent(btoa(dolls));
+  const shareUrl = `${location.origin}${location.pathname}?view=${encoded}`;
+
+  navigator.clipboard.writeText(shareUrl)
+    .then(() => alert("✅ تم نسخ الرابط بنجاح! أرسله لمن تريد ليشاهد مجموعتك."))
+    .catch(() => alert("لم يتم النسخ تلقائيًا. انسخ هذا الرابط يدويًا:\n" + shareUrl));
 }
 
 
