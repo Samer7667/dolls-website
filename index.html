@@ -65,8 +65,21 @@
 <div class="header">
   <div class="image-row">
     <img src="logo.png" alt="Logo" class="logo-img">
-    <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" alt="Example" class="square-img" id="exampleImage" onclick="triggerExampleUpload()" style="cursor: pointer;">
-<input type="file" id="exampleImageInput" accept="image/*" style="display: none;" onchange="changeExampleImage(event)">
+    <img src="HAPPY-BIRTHDAY-JONATHAN.jpg" 
+     alt="Example" 
+     class="square-img" 
+     id="exampleImage" 
+     onclick="triggerExampleUpload()" 
+     style="cursor: pointer;">
+
+<input type="file" 
+       id="exampleImageInput" 
+       accept="image/*" 
+       style="display: none;" 
+       onchange="changeExampleImage(event)">
+
+<button onclick="resetExampleImage()">♻️</button>
+
   </div>
   <h1 id="title">معرض دمى الفرو</h1>
   <select id="language" class="language-select">
@@ -208,9 +221,16 @@ importError: {
 
 };
 
-let language = document.getElementById('language').value;
+// عند تحميل الصفحة، استرجع اللغة المحفوظة أو اجعل الافتراضي "ar"
+let language = localStorage.getItem('selectedLanguage') || 'ar';
+document.getElementById('language').value = language;
+
 let editMode = false;
 let editIndex = null;
+
+// تحديث الواجهة أول ما تفتح الصفحة
+updateUI();
+displayDolls();
 
 function updateUI() {
   document.getElementById('title').textContent = translationsUI.title[language];
@@ -230,8 +250,10 @@ document.getElementById('advancedTitle').textContent = translationsUI.advancedCu
 
 }
 
+// عند تغيير اللغة، احفظها في localStorage
 document.getElementById('language').addEventListener('change', function () {
   language = this.value;
+  localStorage.setItem('selectedLanguage', language); // حفظ اللغة
   updateUI();
   displayDolls();
 });
@@ -377,6 +399,7 @@ function importDolls(event) {
   reader.readAsText(file);
 }
 
+
 updateUI();
 displayDolls();
 function toggleCurtain() {
@@ -387,16 +410,32 @@ function triggerExampleUpload() {
   document.getElementById('exampleImageInput').click();
 }
 
+// دالة لتغيير الصورة وحفظها
 function changeExampleImage(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    document.getElementById('exampleImage').src = e.target.result;
+    const imageData = e.target.result;
+    document.getElementById('exampleImage').src = imageData;
+    localStorage.setItem('exampleImage', imageData); // حفظ الصورة في localStorage
   };
   reader.readAsDataURL(file);
 }
+
+// دالة لإعادة الصورة الأصلية وحذف المحفوظة
+function resetExampleImage() {
+  document.getElementById('exampleImage').src = "HAPPY-BIRTHDAY-JONATHAN.jpg";
+  localStorage.removeItem('exampleImage');
+}
+
+// تحميل الصورة المحفوظة عند فتح الصفحة
+const savedExampleImage = localStorage.getItem('exampleImage');
+if (savedExampleImage) {
+  document.getElementById('exampleImage').src = savedExampleImage;
+}
+
 
 
 </script>
