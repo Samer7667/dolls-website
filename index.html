@@ -23,6 +23,45 @@
 
 
   <style>
+    @media (max-width: 600px) {
+  .doll-card {
+    width: 95%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .doll-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 6px;
+  }
+
+  .doll-card h3, .doll-card p {
+    font-size: 14px;
+    margin: 2px 0;
+  }
+
+  .doll-card button {
+    font-size: 12px;
+    margin: 2px 4px;
+  }
+
+  .form-container input, .form-container textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .logo-img, .square-img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
     body { font-family: Arial, sans-serif; background: #f9f9f9; }
     .header { text-align: center; padding: 20px; }
     .form-container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
@@ -125,8 +164,11 @@ background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-ind
   <input type="file" id="image" accept="image/*" />
   <img id="previewImage" style="max-height: 100px; display: none; margin-top: 10px;" />
   <button onclick="addDoll()" id="addBtn">إضافة</button>
-  <button onclick="shareDolls()">🔗 مشاركة مجموعتي</button>
+
 </div>
+<input type="text" id="searchBar" placeholder="🔍 ابحث عن دمية..." 
+  oninput="searchDolls()" 
+  style="width: 90%; padding: 10px; margin: 20px auto; display: block; font-size: 16px; border-radius: 6px; border: 1px solid #ccc;" />
 
 <div class="doll-list" id="dollList"></div>
 
@@ -466,19 +508,35 @@ function changeExampleImage(event) {
   };
   reader.readAsDataURL(file);
 }
-function shareDolls() {
-  const dolls = localStorage.getItem('dolls');
-  if (!dolls) {
-    alert("لا توجد دمى لمشاركتها.");
-    return;
-  }
 
-  const encoded = encodeURIComponent(btoa(dolls));
-  const shareUrl = `${location.origin}${location.pathname}?view=${encoded}`;
 
-  navigator.clipboard.writeText(shareUrl)
-    .then(() => alert("✅ تم نسخ الرابط بنجاح! أرسله لمن تريد ليشاهد مجموعتك."))
-    .catch(() => alert("لم يتم النسخ تلقائيًا. انسخ هذا الرابط يدويًا:\n" + shareUrl));
+function searchDolls() {
+  const query = document.getElementById('searchBar').value.toLowerCase();
+  const dolls = JSON.parse(localStorage.getItem('dolls') || '[]');
+  const filtered = dolls.filter(doll => doll.name.toLowerCase().includes(query));
+  displayFilteredDolls(filtered);
+}
+
+function displayFilteredDolls(filteredDolls) {
+  const list = document.getElementById('dollList');
+  list.innerHTML = '';
+
+  filteredDolls.forEach((doll, index) => {
+    const card = document.createElement('div');
+    card.className = 'doll-card';
+    card.innerHTML = `
+      <img src="${doll.image}">
+      <div>
+        <h3>${doll.name}</h3>
+        <p><strong>${translate('Birthday')}:</strong> ${doll.birthday}</p>
+        <p><strong>${translate('Year')}:</strong> ${doll.year}</p>
+        <p>${doll.poem}</p>
+        <button onclick="deleteDoll(${index})">🗑️ ${translationsUI.deleteBtn[language]}</button>
+        <button onclick="editDoll(${index})">✏️ ${translationsUI.editBtn[language]}</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
 }
 
 
